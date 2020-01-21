@@ -5,6 +5,8 @@
 cmake_minimum_required (VERSION 3.0.2) # 3.0.2 required for return() statement used in AddDllCopyCommands.cmake
 project(armnn)
 
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+
 set(additional_cmake_files)
 list(APPEND additional_cmake_files
     cmake/ArmnnVersion.cmake
@@ -567,6 +569,7 @@ endif()
 if(PROFILING_BACKEND_STREAMLINE AND (NOT ("${CMAKE_SYSTEM_NAME}" STREQUAL Android)))
     target_link_libraries(armnn pthread)
 endif()
+target_link_libraries(armnn pthread)
 
 set_target_properties(armnn PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION})
 
@@ -846,7 +849,6 @@ if(BUILD_UNIT_TESTS)
         endif()
     endif()
 
-    target_link_libraries(UnitTests ${CMAKE_THREAD_LIBS_INIT})
     target_link_libraries(UnitTests ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
     target_link_libraries(UnitTests armnn)
@@ -887,6 +889,8 @@ if(BUILD_UNIT_TESTS)
     endif()
 
     addDllCopyCommands(UnitTests)
+    target_link_libraries(UnitTests ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(UnitTests pthread)
 endif()
 
 if (BUILD_ARMNN_SERIALIZER AND (BUILD_TF_PARSER OR BUILD_TF_LITE_PARSER OR BUILD_ONNX_PARSER OR BUILD_CAFFE_PARSER) AND ARMNNREF)
@@ -922,6 +926,7 @@ if (BUILD_ARMNN_SERIALIZER AND (BUILD_TF_PARSER OR BUILD_TF_LITE_PARSER OR BUILD
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY})
     addDllCopyCommands(ArmnnConverter)
+    target_link_libraries(ArmnnConverter pthread)
 endif()
 
 if(BUILD_GATORD_MOCK)

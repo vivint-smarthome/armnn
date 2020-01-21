@@ -23,9 +23,12 @@ int main()
     armnn::NetworkId networkIdentifier;
     ITfLiteParserPtr parser = ITfLiteParser::Create();
     std::cout << "Loading network from binary file" << std::endl;
-    INetworkPtr tfNetwork = parser->CreateNetworkFromBinaryFile("/mnt/analytics/models/dbcp.tflite");
+    INetworkPtr tfNetwork = parser->CreateNetworkFromBinaryFile("./active.tflite");
 
+    // NOTE: ORIG for dbcp tflite
     BindingPointInfo input_binding = parser->GetNetworkInputBindingInfo(0, "normalized_input_image_tensor");
+    // NOTE: for mobilenet
+    // BindingPointInfo input_binding = parser->GetNetworkInputBindingInfo(0, "input");
     int input_binding_id = std::get<0>(input_binding);
     TensorInfo input_tensor_info = std::get<1>(input_binding);
     std::cout << "Binding id: " << input_binding_id << std::endl;
@@ -54,7 +57,7 @@ int main()
     }
 
     //Creates structures for inputs and outputs.
-    std::vector<uint8_t> inputData(786432);
+    std::vector<uint8_t> inputData(input_tensor_info.GetNumBytes());
     std::vector<float> bboxes(80);
     std::vector<float> classes(20);
     std::vector<float> scores(20);

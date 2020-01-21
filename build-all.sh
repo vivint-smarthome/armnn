@@ -3,17 +3,16 @@
 set -e
 
 thisDir=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
-NPROC=$(nproc)
+NPROC=4
 
 cd $thisDir
 # Download code here
 git clone https://github.com/vivint-smarthome/ComputeLibrary.git &
-git clone https://github.com/vivint-smarthome/armnn.git &
 curl -LO https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.bz2 && \
-  tar xf boost_1_64_0.tar.bz2 && \
-  rm -rf boost_1_64_0.tar.bz2 && \
-  cd boost_1_64_0 && \
-  echo "using gcc : arm : aarch64-linux-gnu-g++ ;" > user_config.jam &
+tar xf boost_1_64_0.tar.bz2 && \
+rm -rf boost_1_64_0.tar.bz2 && \
+cd boost_1_64_0 && \
+echo "using gcc : arm : aarch64-linux-gnu-g++ ;" > user_config.jam &
 curl -Lo protobuf-3.5.1.tar.gz https://github.com/protocolbuffers/protobuf/releases/download/v3.5.1/protobuf-all-3.5.1.tar.gz && \
   tar -xzf protobuf-3.5.1.tar.gz && \
   rm -rf protobuf-3.5.1.tar.gz &
@@ -33,7 +32,7 @@ cd $thisDir/ComputeLibrary
 if ! which scons >/dev/null 2>&1 ; then
   sudo dnf install scons-python3 -y
 fi
-scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" -j${NPROC} internal_only=0 benchmark_tests=0 validation_tests=0
+scons arch=arm64-v8a neon=1 extra_cxx_flags="-fPIC" -j${NPROC} internal_only=0 benchmark_tests=0 validation_tests=0 Werror=0
 
 # Build boost
 cd $thisDir/boost_1_64_0
@@ -55,7 +54,7 @@ make -j${NPROC}
 
 # Build tensorflow protobufs
 cd $thisDir/tensorflow
-$thisDir/armnn/scripts/generate_tensorflow_protobuf.sh $thisDir/build/tensorflow-protobuf $thisDir/build/protobuf/x86_64
+$thisDir/scripts/generate_tensorflow_protobuf.sh $thisDir/build/tensorflow-protobuf $thisDir/build/protobuf/x86_64
 
 # Build flatbuffers
 cd $thisDir/flatbuffers
@@ -77,10 +76,14 @@ cmake -G "Unix Makefiles" \
 make
 
 # Build ArmNN
-cd $thisDir/armnn
-rm -rf build
-mkdir build
-cd build
+#cd $thisDir/armnn
+#rm -rf build
+#mkdir build
+#cd build
+
+rm -rf $thisDir/armnn-build
+mkdir $thisDir/armnn-build
+cd $thisDir/armnn-build
 
 CXX=aarch64-linux-gnu-g++ \
 CC=aarch64-linux-gnu-gcc \
@@ -92,7 +95,7 @@ cmake .. \
   -DPROTOBUF_ROOT=$thisDir/build/aarch64 \
   -DBUILD_TF_LITE_PARSER=1 \
   -DBUILD_ARMNN_SERIALIZER=1 \
-  -DBUILD_ARMNN_QUANTIZER=0 \
+  -DBUILD_ARMNN_QUANTIZER=1 \
   -DTF_LITE_GENERATED_PATH=$thisDir/tensorflow/tensorflow/lite/schema \
   -DFLATBUFFERS_ROOT=$thisDir/flatbuffers \
   -DFLATBUFFERS_LIBRARY=$thisDir/flatbuffers/libflatbuffers.a \

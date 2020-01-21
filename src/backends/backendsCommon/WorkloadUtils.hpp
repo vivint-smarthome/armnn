@@ -182,8 +182,8 @@ void AssignValues(unsigned int num, unsigned int idx, const ArrayType& array, T&
 template <typename CopyFunc>
 void CopyTensorContentsGeneric(const ITensorHandle* srcTensor, ITensorHandle* dstTensor, CopyFunc copy)
 {
-    std::cout << "Function is not complete" << std::endl;
-    std::abort();
+    std::cout << "CopyTensorContentsGeneric Function: is not complete" << std::endl;
+#if 0
     TensorShape srcStrides      = srcTensor->GetStrides();
     const TensorShape& srcShape = srcTensor->GetShape();
     TensorShape dstStrides      = dstTensor->GetStrides();
@@ -243,6 +243,7 @@ void CopyTensorContentsGeneric(const ITensorHandle* srcTensor, ITensorHandle* ds
 
     srcTensor->Unmap();
     dstTensor->Unmap();
+#endif
 }
 
 template <typename SrcTensorHandleType, typename DstTensorHandleType, typename DescriptorType>
