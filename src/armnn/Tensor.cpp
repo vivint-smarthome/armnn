@@ -13,6 +13,7 @@
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <sstream>
+#include <iostream>
 
 namespace armnn
 {
@@ -36,6 +37,7 @@ TensorShape::TensorShape(unsigned int numDimensions)
 
     if (numDimensions > MaxNumOfTensorDimensions)
     {
+        std::cout << "numDimensions = " << numDimensions << " which is greater than MaxNumOfTensorDimensions = " << MaxNumOfTensorDimensions << std::endl;
         throw InvalidArgumentException("Tensor numDimensions must be less than or equal to MaxNumOfTensorDimensions");
     }
 

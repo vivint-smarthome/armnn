@@ -110,106 +110,170 @@ void FreeTensorIfUnused(std::unique_ptr<Tensor>& tensor)
 }
 
 // Helper function to obtain byte offset into tensor data
-inline size_t GetTensorOffset(const arm_compute::ITensorInfo& info,
-                              uint32_t depthIndex,
-                              uint32_t batchIndex,
-                              uint32_t channelIndex,
-                              uint32_t y,
-                              uint32_t x)
-{
-    arm_compute::Coordinates coords;
-    coords.set(4, static_cast<int>(depthIndex));
-    coords.set(3, static_cast<int>(batchIndex));
-    coords.set(2, static_cast<int>(channelIndex));
-    coords.set(1, static_cast<int>(y));
-    coords.set(0, static_cast<int>(x));
-    return boost::numeric_cast<size_t>(info.offset_element_in_bytes(coords));
-}
+//inline size_t GetTensorOffset(const arm_compute::ITensorInfo& info,
+//                              uint32_t depthIndex,
+//                              uint32_t batchIndex,
+//                              uint32_t channelIndex,
+//                              uint32_t y,
+//                              uint32_t x)
+//{
+//    arm_compute::Coordinates coords;
+//    coords.set(4, static_cast<int>(depthIndex));
+//    coords.set(3, static_cast<int>(batchIndex));
+//    coords.set(2, static_cast<int>(channelIndex));
+//    coords.set(1, static_cast<int>(y));
+//    coords.set(0, static_cast<int>(x));
+//    return boost::numeric_cast<size_t>(info.offset_element_in_bytes(coords));
+//}
 
 // Helper function to obtain element offset into data buffer representing tensor data (assuming no strides).
-inline size_t GetLinearBufferOffset(const arm_compute::ITensorInfo& info,
-                                    uint32_t depthIndex,
-                                    uint32_t batchIndex,
-                                    uint32_t channelIndex,
-                                    uint32_t y,
-                                    uint32_t x)
-{
-    const arm_compute::TensorShape& shape = info.tensor_shape();
-    uint32_t width = static_cast<uint32_t>(shape[0]);
-    uint32_t height = static_cast<uint32_t>(shape[1]);
-    uint32_t numChannels = static_cast<uint32_t>(shape[2]);
-    uint32_t numBatches = static_cast<uint32_t>(shape[3]);
-    return (((depthIndex * numBatches + batchIndex) * numChannels + channelIndex) * height + y) * width + x;
-}
+//inline size_t GetLinearBufferOffset(const arm_compute::ITensorInfo& info,
+//                                    uint32_t depthIndex,
+//                                    uint32_t batchIndex,
+//                                    uint32_t channelIndex,
+//                                    uint32_t y,
+//                                    uint32_t x)
+//{
+//    const arm_compute::TensorShape& shape = info.tensor_shape();
+//    uint32_t width = static_cast<uint32_t>(shape[0]);
+//    uint32_t height = static_cast<uint32_t>(shape[1]);
+//    uint32_t numChannels = static_cast<uint32_t>(shape[2]);
+//    uint32_t numBatches = static_cast<uint32_t>(shape[3]);
+//    return (((depthIndex * numBatches + batchIndex) * numChannels + channelIndex) * height + y) * width + x;
+//}
+
+//template <typename T>
+//void CopyArmComputeITensorData(const arm_compute::ITensor& srcTensor, T* dstData)
+//{
+//    // If MaxNumOfTensorDimensions is increased, this loop will need fixing.
+//    static_assert(MaxNumOfTensorDimensions == 5, "Please update CopyArmComputeITensorData");
+//    {
+//        const arm_compute::ITensorInfo& info = *srcTensor.info();
+//        const arm_compute::TensorShape& shape = info.tensor_shape();
+//        const uint8_t* const bufferPtr = srcTensor.buffer();
+//        uint32_t width = static_cast<uint32_t>(shape[0]);
+//        uint32_t height = static_cast<uint32_t>(shape[1]);
+//        uint32_t numChannels = static_cast<uint32_t>(shape[2]);
+//        uint32_t numBatches = static_cast<uint32_t>(shape[3]);
+//        uint32_t depth = static_cast<uint32_t>(shape[4]);
+//
+//        for (unsigned int depthIndex = 0; depthIndex < depth; ++depthIndex)
+//        {
+//            for (unsigned int batchIndex = 0; batchIndex < numBatches; ++batchIndex)
+//            {
+//                for (unsigned int channelIndex = 0; channelIndex < numChannels; ++channelIndex)
+//                {
+//                    for (unsigned int y = 0; y < height; ++y)
+//                    {
+//                        // Copies one row from arm_compute tensor buffer to linear memory buffer.
+//                        // A row is the largest contiguous region we can copy, as the tensor data may be using strides.
+//                        memcpy(
+//                         dstData + GetLinearBufferOffset(info, depthIndex, batchIndex, channelIndex, y, 0),
+//                         bufferPtr + GetTensorOffset(info, depthIndex, batchIndex, channelIndex, y, 0),
+//                         width * sizeof(T));
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 template <typename T>
 void CopyArmComputeITensorData(const arm_compute::ITensor& srcTensor, T* dstData)
 {
-    // If MaxNumOfTensorDimensions is increased, this loop will need fixing.
-    static_assert(MaxNumOfTensorDimensions == 5, "Please update CopyArmComputeITensorData");
-    {
-        const arm_compute::ITensorInfo& info = *srcTensor.info();
-        const arm_compute::TensorShape& shape = info.tensor_shape();
-        const uint8_t* const bufferPtr = srcTensor.buffer();
-        uint32_t width = static_cast<uint32_t>(shape[0]);
-        uint32_t height = static_cast<uint32_t>(shape[1]);
-        uint32_t numChannels = static_cast<uint32_t>(shape[2]);
-        uint32_t numBatches = static_cast<uint32_t>(shape[3]);
-        uint32_t depth = static_cast<uint32_t>(shape[4]);
+    const arm_compute::ITensorInfo& info = *srcTensor.info();
+    const arm_compute::TensorShape& shape = info.tensor_shape();
+    const uint8_t* const bufferPtr = srcTensor.buffer();
+    uint32_t width = shape[0];
 
-        for (unsigned int depthIndex = 0; depthIndex < depth; ++depthIndex)
-        {
-            for (unsigned int batchIndex = 0; batchIndex < numBatches; ++batchIndex)
-            {
-                for (unsigned int channelIndex = 0; channelIndex < numChannels; ++channelIndex)
-                {
-                    for (unsigned int y = 0; y < height; ++y)
-                    {
-                        // Copies one row from arm_compute tensor buffer to linear memory buffer.
-                        // A row is the largest contiguous region we can copy, as the tensor data may be using strides.
-                        memcpy(
-                         dstData + GetLinearBufferOffset(info, depthIndex, batchIndex, channelIndex, y, 0),
-                         bufferPtr + GetTensorOffset(info, depthIndex, batchIndex, channelIndex, y, 0),
-                         width * sizeof(T));
-                    }
-                }
+    uint32_t num_dimensions = shape.num_dimensions();
+    arm_compute::Coordinates coords = {};
+
+    size_t total_size = shape.total_size();
+    size_t total_loops = total_size / shape[0];
+    size_t offset = 0;
+    for(size_t i = 0; i < total_loops; i++) {
+
+        memcpy(
+          dstData + offset,
+          bufferPtr + boost::numeric_cast<size_t>(info.offset_element_in_bytes(coords)),
+          width * static_cast<uint32_t>(sizeof(T))
+        );
+        offset += width;
+        for(size_t j = 1; j < num_dimensions; j++) {
+            coords.set(j, coords[j] + 1);
+            if (static_cast<uint32_t>(coords[j]) < shape[j]) {
+                break;
             }
+            coords.set(j, 0);
         }
     }
 }
 
+//template <typename T>
+//void CopyArmComputeITensorData(const T* srcData, arm_compute::ITensor& dstTensor)
+//{
+//    // If MaxNumOfTensorDimensions is increased, this loop will need fixing.
+//    static_assert(MaxNumOfTensorDimensions == 5, "Please update CopyArmComputeITensorData");
+//    {
+//        const arm_compute::ITensorInfo& info = *dstTensor.info();
+//        const arm_compute::TensorShape& shape = info.tensor_shape();
+//        uint8_t* const bufferPtr = dstTensor.buffer();
+//        uint32_t width = static_cast<uint32_t>(shape[0]);
+//        uint32_t height = static_cast<uint32_t>(shape[1]);
+//        uint32_t numChannels = static_cast<uint32_t>(shape[2]);
+//        uint32_t numBatches = static_cast<uint32_t>(shape[3]);
+//        uint32_t depth = static_cast<uint32_t>(shape[4]);
+//
+//        for (unsigned int depthIndex = 0; depthIndex < depth; ++depthIndex)
+//        {
+//            for (unsigned int batchIndex = 0; batchIndex < numBatches; ++batchIndex)
+//            {
+//                for (unsigned int channelIndex = 0; channelIndex < numChannels; ++channelIndex)
+//                {
+//                    for (unsigned int y = 0; y < height; ++y)
+//                    {
+//                        // Copies one row from linear memory buffer to arm_compute tensor buffer.
+//                        // A row is the largest contiguous region we can copy, as the tensor data may be using strides.
+//                        memcpy(
+//                         bufferPtr + GetTensorOffset(info, depthIndex, batchIndex, channelIndex, y, 0),
+//                         srcData + GetLinearBufferOffset(info, depthIndex, batchIndex, channelIndex, y, 0),
+//                         width * sizeof(T));
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+
 template <typename T>
 void CopyArmComputeITensorData(const T* srcData, arm_compute::ITensor& dstTensor)
 {
-    // If MaxNumOfTensorDimensions is increased, this loop will need fixing.
-    static_assert(MaxNumOfTensorDimensions == 5, "Please update CopyArmComputeITensorData");
-    {
-        const arm_compute::ITensorInfo& info = *dstTensor.info();
-        const arm_compute::TensorShape& shape = info.tensor_shape();
-        uint8_t* const bufferPtr = dstTensor.buffer();
-        uint32_t width = static_cast<uint32_t>(shape[0]);
-        uint32_t height = static_cast<uint32_t>(shape[1]);
-        uint32_t numChannels = static_cast<uint32_t>(shape[2]);
-        uint32_t numBatches = static_cast<uint32_t>(shape[3]);
-        uint32_t depth = static_cast<uint32_t>(shape[4]);
+    const arm_compute::ITensorInfo& info = *dstTensor.info();
+    const arm_compute::TensorShape& shape = info.tensor_shape();
+    uint8_t* const bufferPtr = dstTensor.buffer();
+    uint32_t width = shape[0];
 
-        for (unsigned int depthIndex = 0; depthIndex < depth; ++depthIndex)
-        {
-            for (unsigned int batchIndex = 0; batchIndex < numBatches; ++batchIndex)
-            {
-                for (unsigned int channelIndex = 0; channelIndex < numChannels; ++channelIndex)
-                {
-                    for (unsigned int y = 0; y < height; ++y)
-                    {
-                        // Copies one row from linear memory buffer to arm_compute tensor buffer.
-                        // A row is the largest contiguous region we can copy, as the tensor data may be using strides.
-                        memcpy(
-                         bufferPtr + GetTensorOffset(info, depthIndex, batchIndex, channelIndex, y, 0),
-                         srcData + GetLinearBufferOffset(info, depthIndex, batchIndex, channelIndex, y, 0),
-                         width * sizeof(T));
-                    }
-                }
+    uint32_t num_dimensions = shape.num_dimensions();
+    arm_compute::Coordinates coords = {};
+
+    size_t total_size = shape.total_size();
+    size_t total_loops = total_size / shape[0];
+    size_t offset = 0;
+    for(size_t i = 0; i < total_loops; i++) {
+
+        memcpy(
+          bufferPtr + boost::numeric_cast<size_t>(info.offset_element_in_bytes(coords)),
+          srcData + offset,
+          width * static_cast<uint32_t>(sizeof(T))
+        );
+        offset += width;
+        for(size_t j = 1; j < num_dimensions; j++) {
+            coords.set(j, coords[j] + 1);
+            if (static_cast<uint32_t>(coords[j]) < shape[j]) {
+                break;
             }
+            coords.set(j, 0);
         }
     }
 }
