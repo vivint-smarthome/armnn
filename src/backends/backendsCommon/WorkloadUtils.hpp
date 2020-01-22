@@ -179,11 +179,37 @@ void AssignValues(unsigned int num, unsigned int idx, const ArrayType& array, T&
 //    dstTensor->Unmap();
 //}
 
+static bool increment_pos(std::vector<size_t> &pos, size_t iter_dimension, TensorShape const &srcDimensionSize, TensorShape const &dstDimensionSize) {
+    pos[iter_dimension]++;
+
+    for (ssize_t i = iter_dimension; i >= 1; i--) {
+        size_t dimensionSize = std::min(dstDimensionSize[i], srcDimensionSize[i]);
+
+        // TODO: should this be >= instead of > ?
+        if (pos[i] >= dimensionSize) {
+            pos[i] = 0;
+            pos[i-1]++;
+        }
+    }
+
+    return pos[0] >= std::min(dstDimensionSize[0], srcDimensionSize[0]);
+}
+
+static size_t dim_index(std::vector<size_t> const &pos, TensorShape const &dimensionStride) {
+    size_t idx = 0;
+    for (size_t i = 0; i < pos.size(); i++) {
+        idx += pos[i] * dimensionStride[i];
+    }
+    return idx;
+}
+
+// CopyFunc:
+// copy(dst, src, bytes)
 template <typename CopyFunc>
 void CopyTensorContentsGeneric(const ITensorHandle* srcTensor, ITensorHandle* dstTensor, CopyFunc copy)
 {
-    std::cout << "CopyTensorContentsGeneric Function: is not complete" << std::endl;
-#if 0
+    //std::cout << "me CopyTensorContentsGeneric Function: is not complete" << std::endl;
+
     TensorShape srcStrides      = srcTensor->GetStrides();
     const TensorShape& srcShape = srcTensor->GetShape();
     TensorShape dstStrides      = dstTensor->GetStrides();
@@ -197,53 +223,64 @@ void CopyTensorContentsGeneric(const ITensorHandle* srcTensor, ITensorHandle* ds
         dstData = static_cast<uint8_t*>(dstTensor->Map());
     }
 
-    uint32_t srcCopyStride = srcShape[0] * srcStrides[0];
-    uint32_t dstCopyStride = dstShape[0] * dstStrides[0];
-    uint32_t copyLength = std::min(srcCopyStride, dstCopyStride);
-    uint32_t start_dimension = 1;
-    uint32_t num_dimensions = std::min(srcShape.GetNumDimensions(), dstShape.GetNumDimensions());
-    for(uint32_t i = 1; i < num_dimensions; i++) {
-        uint32_t dimension = std::min(srcShape[i], dstShape[i]);
-        if (copyLength != srcStrides[i] || copyLength != dstStrides[i]) {
-            break;
+    /*
+    for (int i = 0; i < srcStrides.GetNumDimensions(); i++) {
+        if (srcStrides[i] != dstStrides[i]) {
+            std::cout << "Stride " << i << " srcStride: " << srcStrides[i] << " dstStride: " << dstStrides[i] << std::endl;
         }
-        start_dimension += 1;
-        copyLength *= dimension;
-        srcCopyStride *= srcStrides[i];
-        dstCopyStride *= dstStrides[i];
+        //std::cout << "Stride[" << i << "]: " << srcStrides[i] << std::endl;
+    }
+    for (int i = 0; i < srcShape.GetNumDimensions(); i++) {
+        if (srcShape[i] != dstShape[i]) {
+            std::cout << "Shape " << i << " srcShape: " << srcShape[i] << " dstShape: " << dstShape[i] << std::endl;
+        }
+        //std::cout << "Shape[" << i << "]: " << srcShape[i] << std::endl;
+    }
+    */
+
+    std::vector<size_t> pos(srcStrides.GetNumDimensions());
+    std::fill(pos.begin(), pos.end(), 0);
+
+    // Coalesce inner dimensions to save calls to copy()
+    size_t iter_dim = pos.size()-1;
+
+    for (int i = pos.size()-1; i >= 0; i--) {
+        if (srcStrides[i] != dstStrides[i]
+            || srcShape[i] != dstShape[i]) {
+            break;
+        } else {
+            iter_dim = i;
+        }
     }
 
-    //std::array<uint8_t*, Dimensions::num_max_dimensions> srcPtrs = { };
-    //std::array<uint8_t*, Dimensions::num_max_dimensions> dstPtrs = { };
-    //TensorShape shape = dstTensor->GetShape();;
+    // std::cout << "chosen iter_dim " << iter_dim << std::endl;
 
-    size_t total_loops = 1;
-    for(uint32_t i = start_dimension; i < num_dimensions; i++) {
-        uint32_t dimension = std::min(srcShape[i], dstShape[i]);
-        total_loops *= dimension;
-        //srcPtrs[i] = srcData;
-        //dstPtrs[i] = dstData;
+    size_t copy_calls = 0;
+    bool done = false;
+    size_t copy_bytes = std::min(srcStrides[iter_dim], dstStrides[iter_dim]);
+
+    while (!done) {
+        size_t src_idx = dim_index(pos, srcStrides);
+        size_t dst_idx = dim_index(pos, dstStrides);
+
+        /*
+        if (true || srcShape[1] == 2391) {
+            std::cout << "pos:";
+            for (auto it = pos.begin(); it != pos.end(); ++it) {
+                std::cout << " " << *it;
+            }
+            std::cout << " src_idx: " << src_idx << " dst_idx: " << dst_idx << std::endl;
+        }
+        */
+
+        copy(dstData + dst_idx, srcData + src_idx, copy_bytes);
+        copy_calls++;
+        done = increment_pos(pos, iter_dim, srcShape, dstShape);
     }
-
-    for(size_t i = 0; i < total_loops; i++) {
-
-        copy(dstData, srcData, copyLength);
-        dstData += dstCopyStride;
-        srcData += srcCopyStride;
-
-    //TODO figure out how to add stride offsets correctly.
-//        for(size_t j = 1; j < num_dimensions; j++) {
-//            coords.set(j, coords[j] + 1);
-//            if (static_cast<uint32_t>(coords[j]) < shape[j]) {
-//                break;
-//            }
-//            coords.set(j, 0);
-//        }
-    }
+    // std::cout << "Executed " << copy_calls << " Copy Calls" << std::endl;
 
     srcTensor->Unmap();
     dstTensor->Unmap();
-#endif
 }
 
 template <typename SrcTensorHandleType, typename DstTensorHandleType, typename DescriptorType>
