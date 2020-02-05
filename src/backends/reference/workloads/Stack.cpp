@@ -10,8 +10,8 @@ namespace armnn
 {
 
 void Stack(const StackQueueDescriptor& data,
-           std::vector<std::unique_ptr<Decoder<float>>>& inputs,
-           Encoder<float>& output)
+        std::vector<std::unique_ptr<Decoder<float>>>& inputs,
+        Encoder<float>& output)
 {
     const TensorInfo& outputInfo = GetTensorInfo(data.m_Outputs[0]);
     const TensorInfo& inputInfo = GetTensorInfo(data.m_Inputs[0]);
@@ -32,30 +32,35 @@ void Stack(const StackQueueDescriptor& data,
     }
 
     const unsigned int iNumTensors = static_cast<unsigned int>(data.m_Inputs.size());
-    const unsigned int iBatchSize  = inputDims[0];
-    const unsigned int iChannels   = (inputNumDims > 1) ? inputDims[1] : 1;
-    const unsigned int iHeight     = (inputNumDims > 2) ? inputDims[2] : 1;
-    const unsigned int iWidth      = (inputNumDims > 3) ? inputDims[3] : 1;
 
-    const unsigned int oBatchSize  = outputDims[1];
-    const unsigned int oChannels   = (outputNumDims > 2) ? outputDims[2] : 1;
-    const unsigned int oHeight     = (outputNumDims > 3) ? outputDims[3] : 1;
-    const unsigned int oWidth      = (outputNumDims > 4) ? outputDims[4] : 1;
+    std::vector<unsigned int> osz;
+    for (int i = 0; i < outputNumDims; i++) {
+        osz.push_back(outputDims[i]);
+    }
 
-    // Array to store the input coordinates
-    // iCoordinates[0] = i, iCoordinates[1] = bi, iCoordinates[2] = ci
-    // iCoordinates[3] = hi, iCoordinates[4] = wi, iCoordinates[5] = 0
-    // iCoordinates[5] will be always zero and used for not incrementing
-    // the output when the input has less than 4 dimensions
-    std::array<unsigned int, 6> iCoordinates{ 0 };
+    std::vector<unsigned int> isz;
+    isz.push_back(iNumTensors);
+    for (int i = 0; i < inputNumDims; i++) {
+        isz.push_back(inputDims[i]);
+    }
+
+    // the input coordinates
+    // iCoordinates[0] -> the input tensor number
+    // iCoordinates[n] -> dimension n iterator
+    // ...
+    // iCoordinates[iCoordinates.size()-2] -> the last real tensor
+    // iCoordinates[iCoordinates.size()-1] -> always 0
+    std::vector<unsigned int> iCoordinates;
+    for (int i = 0; i < inputNumDims + 2; i++) {
+        iCoordinates.push_back(0);
+    }
 
     // Array of pointers used to map the output coordinates to the input ones, in accordance with the axis
-    // This array is initialized with &iCoordinates[5] since this will be always zero
-    std::array<unsigned int *, 5> oCoordinates = { &iCoordinates[5],
-                                                   &iCoordinates[5],
-                                                   &iCoordinates[5],
-                                                   &iCoordinates[5],
-                                                   &iCoordinates[5] };
+    // This array is initialized with &iCoordinates[size-1] since this will be always zero
+    std::vector<unsigned int *> oCoordinates;
+    for (int i = 0; i < outputNumDims; i++) {
+        oCoordinates.push_back(&iCoordinates[iCoordinates.size()]);
+    }
 
     // Set the axis coordinate
     oCoordinates[axis] = &iCoordinates[0];
@@ -71,45 +76,69 @@ void Stack(const StackQueueDescriptor& data,
         oCoordinates[dim + dim_shift] = &iCoordinates[dim + 1];
     }
 
-    // Alias for the input coordinates
-    unsigned int &i  = iCoordinates[0];
-    unsigned int &bi = iCoordinates[1];
-    unsigned int &ci = iCoordinates[2];
-    unsigned int &hi = iCoordinates[3];
-    unsigned int &wi = iCoordinates[4];
-
-    // Alias for the output coordinates
-    unsigned int &o  = *(oCoordinates[0]);
-    unsigned int &bo = *(oCoordinates[1]);
-    unsigned int &co = *(oCoordinates[2]);
-    unsigned int &ho = *(oCoordinates[3]);
-    unsigned int &wo = *(oCoordinates[4]);
-
     // Stack tensors
-    for(; i < iNumTensors; ++(i))
-    {
-        for(bi = 0; bi < iBatchSize; ++(bi))
-        {
-            for(ci = 0; ci < iChannels; ++(ci))
-            {
-                for(hi = 0; hi < iHeight; ++(hi))
-                {
-                    for(wi = 0; wi < iWidth; ++(wi))
-                    {
-                        output[o  * oWidth * oHeight * oChannels * oBatchSize +
-                               bo * oWidth * oHeight * oChannels +
-                               co * oWidth * oHeight +
-                               ho * oWidth +
-                               wo];
 
-                        output.Set(inputs[i]->Get());
+    size_t in_idx = 0;
+    while (iCoordinates[0] < iNumTensors) {
+        /*
+        size_t out_idx2 = 
+        (*oCoordinates[0])  * osz[5] * osz[4] * osz[3] * osz[2] * osz[1] +
+               (*oCoordinates[1]) * osz[5] * osz[4] * osz[3] * osz[2] +
+               (*oCoordinates[2])  * osz[5] * osz[4] * osz[3] +
+               (*oCoordinates[3])  * osz[5] * osz[4] +
+               (*oCoordinates[4])  * osz[5] + 
+               (*oCoordinates[5]);
 
-                        ++(*(inputs[i]));
-                    }
-                }
+        size_t in_idx2 =
+            iCoordinates[1] * isz[5] * isz[4] * isz[3] * isz[2] +
+            iCoordinates[2] * isz[5] * isz[4] * isz[3] +
+            iCoordinates[3] * isz[5] * isz[4] +
+            iCoordinates[4] * isz[5] +
+            iCoordinates[5];
+        */
+
+        size_t out_idx = 0;
+        for (int i = 0; i < oCoordinates.size(); i++) {
+            size_t row_tmp = (*oCoordinates[i]);
+            for (int j = i+1; j < oCoordinates.size(); j++) {
+                row_tmp *= osz[j];
             }
+            out_idx += row_tmp;
+        }
+
+        /*
+        size_t in_idx = 0;
+        for (int i = 1; i < iCoordinates.size(); i++) {
+            size_t row_tmp = iCoordinates[i];
+            for (int j = i+1; j < iCoordinates.size()-1; j++) {
+                row_tmp *= isz[j];
+            }
+            in_idx += row_tmp;
+        }
+        */
+
+        // Write data
+        output[out_idx];
+        (*inputs[iCoordinates[0]])[in_idx];
+        output.Set(inputs[iCoordinates[0]]->Get());
+
+        // Update iCoordinates
+        size_t old_tensor = iCoordinates[0];
+        iCoordinates[iCoordinates.size()-2]++;
+        for (ssize_t i = iCoordinates.size()-2; i >= 1; i--) {
+            if (iCoordinates[i] >= isz[i]) {
+                iCoordinates[i] = 0;
+                iCoordinates[i-1]++;
+            }
+            else {
+                break;
+            }
+        }
+
+        in_idx++;
+        if (old_tensor != iCoordinates[0]) {
+            in_idx = 0;
         }
     }
 }
-
 } // namespace armnn
