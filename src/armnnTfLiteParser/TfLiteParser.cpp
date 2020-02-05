@@ -2827,6 +2827,18 @@ TfLiteParser::CreateConstTensor(TensorRawPtr tensorPtr,
 {
     CHECK_TENSOR_PTR(tensorPtr);
     auto bufferPtr = GetBuffer(m_Model, tensorPtr->buffer);
+
+    // TODO: const_cast is not good, figure out another way
+    // Resize buffer if it wouldn't fit
+    if(tensorInfo.GetNumElements() > bufferPtr->data.size() ||
+            tensorInfo.GetNumBytes() > bufferPtr->data.size()) {
+        printf("CreateConstTensor: tensorInfo.GetNumElements() > bufferPtr->data.size(), patching\n");
+        auto mod_data = const_cast<std::vector<unsigned char>&>(bufferPtr->data);
+        size_t old_size = mod_data.size();
+        mod_data.resize(std::max(tensorInfo.GetNumElements(), tensorInfo.GetNumBytes()), 0);
+        std::fill(mod_data.begin() + old_size, mod_data.end(), 0);
+    }
+
     CHECK_BUFFER_SIZE(bufferPtr, tensorInfo, tensorPtr->buffer);
 
     switch (tensorInfo.GetDataType())
