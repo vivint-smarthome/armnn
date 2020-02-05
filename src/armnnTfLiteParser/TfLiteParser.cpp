@@ -1915,8 +1915,19 @@ void TfLiteParser::ParseReshape(size_t subgraphIndex, size_t operatorIndex)
 
     armnn::TensorInfo inputTensorInfo  = ToTensorInfo(inputs[0]);
     armnn::TensorInfo actualOutputTensorInfo  = ToTensorInfo(outputs[0]);
-    armnn::TensorInfo reshapeOutputTensorInfo =
-        TfLiteParser::OutputShapeOfReshape(inputTensorInfo, options->new_shape);
+    armnn::TensorInfo reshapeOutputTensorInfo;
+    if (options->new_shape.size() == 0) {
+        // TODO: 
+        // if new_shape is missing, then generate the shape based on other information
+        // about the node.
+        printf("Reshape node is missing new_shape attribute!\n");
+        printf("Matching output shape instead!\n");
+
+        reshapeOutputTensorInfo = TfLiteParser::OutputShapeOfReshape(inputTensorInfo, outputs[0]->shape);
+    }
+    else {
+        reshapeOutputTensorInfo = TfLiteParser::OutputShapeOfReshape(inputTensorInfo, options->new_shape);
+    }
 
     // Check for valid input size and that reshape parameters equal output shape
     const armnn::TensorShape& reshapeOutputTensorShape = reshapeOutputTensorInfo.GetShape();
