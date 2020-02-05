@@ -593,6 +593,19 @@ bool NeonLayerSupport::IsQuantizedLstmSupported(const TensorInfo& input,
                                    paramsInfo);
 }
 
+bool NeonLayerSupport::IsReduceMaxSupported(const TensorInfo& input,
+                                          const TensorInfo& output,
+                                          const ReduceMaxDescriptor& descriptor,
+                                          Optional<std::string&> reasonIfUnsupported) const
+{ 
+    // TODO - actually validate, don't just say it's supported
+    ignore_unused(descriptor);
+    return IsSupportedForDataTypeNeon(reasonIfUnsupported,
+                                      input.GetDataType(),
+                                      &TrueFunc<>,
+                                      &TrueFunc<>);
+}
+
 bool NeonLayerSupport::IsReshapeSupported(const TensorInfo& input,
                                           const ReshapeDescriptor& descriptor,
                                           Optional<std::string&> reasonIfUnsupported) const

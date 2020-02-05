@@ -54,6 +54,7 @@ BACKEND_SOURCES := \
         workloads/ClPreluWorkload.cpp \
         workloads/ClQuantizedLstmWorkload.cpp \
         workloads/ClQuantizeWorkload.cpp \
+        workloads/ClReduceMaxWorkload.cpp \
         workloads/ClReshapeWorkload.cpp \
         workloads/ClResizeWorkload.cpp \
         workloads/ClRsqrtWorkload.cpp \

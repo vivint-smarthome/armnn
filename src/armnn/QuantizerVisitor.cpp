@@ -428,6 +428,15 @@ void QuantizerVisitor::VisitReshapeLayer(const IConnectableLayer* layer,
     SetQuantizedInputConnections(layer, newLayer);
 }
 
+void QuantizerVisitor::VisitReduceMaxLayer(const IConnectableLayer* layer,
+                                         const ReduceMaxDescriptor& reduceMaxDescriptor,
+                           const armnn::Optional<armnn::ConstTensor>& axis,
+                                         const char* name)
+{
+    // TODO
+    throw Exception("QuantizerVisitor::VisitReduceMaxLayer not implemented yet");
+}
+
 void QuantizerVisitor::VisitResizeBilinearLayer(const IConnectableLayer* layer,
                                                 const ResizeBilinearDescriptor& resizeBilinearDescriptor,
                                                 const char* name)

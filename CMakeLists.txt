@@ -332,6 +332,8 @@ list(APPEND armnn_sources
     src/armnn/layers/PreluLayer.cpp
     src/armnn/layers/ReshapeLayer.hpp
     src/armnn/layers/ReshapeLayer.cpp
+    src/armnn/layers/ReduceMaxLayer.hpp
+    src/armnn/layers/ReduceMaxLayer.cpp
     src/armnn/layers/ResizeLayer.hpp
     src/armnn/layers/ResizeLayer.cpp
     src/armnn/layers/RsqrtLayer.cpp

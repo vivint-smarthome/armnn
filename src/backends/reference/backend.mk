@@ -76,6 +76,7 @@ BACKEND_SOURCES := \
         workloads/RefPreluWorkload.cpp \
         workloads/RefQuantizeWorkload.cpp \
         workloads/RefReshapeWorkload.cpp \
+        workloads/RefReduceMaxWorkload.cpp \
         workloads/RefResizeBilinearWorkload.cpp \
         workloads/RefResizeWorkload.cpp \
         workloads/RefRsqrtWorkload.cpp \

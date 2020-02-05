@@ -30,6 +30,11 @@ template <> struct StringifyLayerParameters<PermuteDescriptor>
     static void Serialize(ParameterStringifyFunction & fn, const PermuteDescriptor & desc);
 };
 
+template <> struct StringifyLayerParameters<ReduceMaxDescriptor>
+{
+    static void Serialize(ParameterStringifyFunction &fn, const ReduceMaxDescriptor &desc);
+};
+
 template <> struct StringifyLayerParameters<ReshapeDescriptor>
 {
     static void Serialize(ParameterStringifyFunction & fn, const ReshapeDescriptor & desc);

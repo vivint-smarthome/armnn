@@ -729,6 +729,21 @@ struct ResizeDescriptor
     DataLayout m_DataLayout;
 };
 
+/// A ReduceMaxDescriptor for the ReduceMaxLayer
+struct ReduceMaxDescriptor {
+    ReduceMaxDescriptor() : m_KeepDims(false), m_HasAxis(false) {}
+    ReduceMaxDescriptor(bool keepdims, bool hasaxis) : m_KeepDims(keepdims), m_HasAxis(hasaxis) {}
+
+    bool operator ==(const ReduceMaxDescriptor& rhs) const
+    {
+        return m_KeepDims == rhs.m_KeepDims;
+    }
+
+    /// If true, retains reduced dimensions with length 1
+    bool m_KeepDims;
+    bool m_HasAxis;
+};
+
 
 /// A ReshapeDescriptor for the ReshapeLayer.
 struct ReshapeDescriptor

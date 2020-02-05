@@ -201,6 +201,11 @@ public:
                            const armnn::ReshapeDescriptor& reshapeDescriptor,
                            const char* name = nullptr) override;
 
+    void VisitReduceMaxLayer(const armnn::IConnectableLayer* layer,
+                           const armnn::ReduceMaxDescriptor& reduceMaxDescriptor,
+                           const armnn::Optional<armnn::ConstTensor>& axis,
+                           const char* name = nullptr) override;
+
     void VisitResizeLayer(const armnn::IConnectableLayer* layer,
                           const armnn::ResizeDescriptor& resizeDescriptor,
                           const char* name = nullptr) override;

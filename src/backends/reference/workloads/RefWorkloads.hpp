@@ -49,6 +49,7 @@
 #include "RefPreluWorkload.hpp"
 #include "RefQuantizeWorkload.hpp"
 #include "RefReshapeWorkload.hpp"
+#include "RefReduceMaxWorkload.hpp"
 #include "RefResizeBilinearWorkload.hpp"
 #include "RefResizeWorkload.hpp"
 #include "RefRsqrtWorkload.hpp"

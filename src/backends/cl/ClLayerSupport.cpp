@@ -662,6 +662,20 @@ bool ClLayerSupport::IsReshapeSupported(const TensorInfo& input,
     return true;
 }
 
+bool ClLayerSupport::IsReduceMaxSupported(const TensorInfo& input,
+                                        const TensorInfo& output,
+                                        const ReduceMaxDescriptor& descriptor,
+                                        Optional<std::string&> reasonIfUnsupported) const
+{
+    // TODO
+    throw Exception("ClLayerSupport::IsReduceMaxSupported for ReduceMask not implemented yet");
+    ignore_unused(input);
+    ignore_unused(output);
+    ignore_unused(descriptor);
+    ignore_unused(reasonIfUnsupported);
+    return true;
+}
+
 bool ClLayerSupport::IsResizeSupported(const TensorInfo& input,
                                        const TensorInfo& output,
                                        const ResizeDescriptor& descriptor,

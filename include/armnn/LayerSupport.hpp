@@ -309,6 +309,13 @@ bool IsReshapeSupported(const BackendId& backend,
                         char* reasonIfUnsupported = nullptr,
                         size_t reasonIfUnsupportedMaxLength = 1024);
 
+bool IsReduceMaxSupported(const BackendId& backend,
+                        const TensorInfo& input,
+                        const TensorInfo& output,
+                        const ReduceMaxDescriptor& descriptor,
+                        char* reasonIfUnsupported = nullptr,
+                        size_t reasonIfUnsupportedMaxLength = 1024);
+
 /// Deprecated in favor of IBackend and ILayerSupport interfaces
 ARMNN_DEPRECATED_MSG("Use IsResizeSupported instead")
 bool IsResizeBilinearSupported(const BackendId& backend,

@@ -113,6 +113,7 @@ private:
     void ParsePooling2d(GraphPtr graph, unsigned int layerIndex);
     void ParsePrelu(GraphPtr graph, unsigned int layerIndex);
     void ParseQuantize(GraphPtr graph, unsigned int layerIndex);
+    void ParseReduceMax(GraphPtr graph, unsigned int layerIndex);
     void ParseReshape(GraphPtr graph, unsigned int layerIndex);
     void ParseResize(GraphPtr graph, unsigned int layerIndex);
     void ParseResizeBilinear(GraphPtr graph, unsigned int layerIndex);

@@ -168,6 +168,9 @@ public:
 
     IConnectableLayer* AddConstantLayer(const ConstTensor& input, const char* name = nullptr) override;
 
+    IConnectableLayer* AddReduceMaxLayer(const ReduceMaxDescriptor& reduceMaxDescriptor, const Optional<ConstTensor>& axis,
+                                       const char* name = nullptr) override;
+
     IConnectableLayer* AddReshapeLayer(const ReshapeDescriptor& reshapeDescriptor,
                                        const char* name = nullptr) override;
 

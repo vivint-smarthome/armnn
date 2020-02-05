@@ -538,6 +538,16 @@ bool IsReshapeSupported(const BackendId& backend,
     FORWARD_LAYER_SUPPORT_FUNC(backend, IsReshapeSupported, input, descriptor);
 }
 
+bool IsReduceMaxSupported(const BackendId& backend,
+                        const TensorInfo& input,
+                        const TensorInfo& output,
+                        const ReduceMaxDescriptor& descriptor,
+                        char* reasonIfUnsupported,
+                        size_t reasonIfUnsupportedMaxLength)
+{
+    FORWARD_LAYER_SUPPORT_FUNC(backend, IsReduceMaxSupported, input, output, descriptor);
+}
+
 bool IsResizeSupported(const BackendId& backend,
                        const TensorInfo& input,
                        const TensorInfo& output,

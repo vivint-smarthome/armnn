@@ -1519,6 +1519,36 @@ void ConstantQueueDescriptor::Validate(const WorkloadInfo& workloadInfo) const
     ValidateDataTypes(outputTensorInfo, supportedTypes, descriptorName);
 }
 
+void ReduceMaxQueueDescriptor::Validate(const WorkloadInfo& workloadInfo) const
+{
+    const std::string descriptorName{"ReduceMaxQueueDescriptor"};
+
+    // TODO: Are these correct?
+    // TODO: Think of better validations
+    // ValidateNumInputs(workloadInfo,  descriptorName, 1);
+    // ValidateNumOutputs(workloadInfo, descriptorName, 1);
+    
+    const TensorInfo& inputTensorInfo  = workloadInfo.m_InputTensorInfos[0];
+    const TensorInfo& outputTensorInfo = workloadInfo.m_OutputTensorInfos[0];
+
+   // ValidateTensorNumElementsMatch(inputTensorInfo, outputTensorInfo, descriptorName, "input", "output");
+    
+    // throw Exception("ReduceMaxQueueDescriptor::Validate not implemented yet");
+    
+    // Check the supported data types
+    std::vector<DataType> supportedTypes =
+    {
+        DataType::Float32,
+        DataType::Float16,
+        DataType::Signed32,
+        DataType::QuantisedAsymm8,
+        DataType::QuantisedSymm16
+    };
+
+    ValidateDataTypes(inputTensorInfo, supportedTypes, descriptorName);
+    ValidateTensorDataTypesMatch(inputTensorInfo, outputTensorInfo, descriptorName, "input", "output");
+}
+
 void ReshapeQueueDescriptor::Validate(const WorkloadInfo& workloadInfo) const
 {
     const std::string descriptorName{"ReshapeQueueDescriptor"};

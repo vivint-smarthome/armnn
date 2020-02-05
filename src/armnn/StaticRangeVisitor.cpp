@@ -198,6 +198,15 @@ void StaticRangeVisitor::VisitConstantLayer(const IConnectableLayer* layer,
     SetRange(layer, 0, min, max);
 }
 
+void StaticRangeVisitor::VisitReduceMaxLayer(const IConnectableLayer* layer,
+                                           const ReduceMaxDescriptor& reduceMaxDescriptor,
+                           const armnn::Optional<armnn::ConstTensor>& axis,
+                                           const char* name)
+{
+    // TODO
+    throw Exception("TfLiteParser::ParseReduceMax not implemented yet");
+}
+
 void StaticRangeVisitor::VisitReshapeLayer(const IConnectableLayer* layer,
                                            const ReshapeDescriptor& reshapeDescriptor,
                                            const char* name)

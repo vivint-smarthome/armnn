@@ -145,7 +145,8 @@ enum LayerType : uint {
     InstanceNormalization = 50,
     LogSoftmax = 51,
     Comparison = 52,
-    StandIn = 53
+    StandIn = 53,
+    ReduceMax = 54,
 }
 
 // Base layer table to be used as part of other layers
@@ -399,6 +400,17 @@ table DepthwiseConvolution2dDescriptor {
 
 table OutputLayer {
     base:BindableLayerBase;
+}
+
+table ReduceMaxLayer {
+    base:LayerBase;
+    descriptor:ReduceMaxDescriptor;
+    axis:ConstTensor;
+}
+
+table ReduceMaxDescriptor {
+    axis:[int];
+    keepDims:bool;
 }
 
 table ReshapeLayer {
@@ -757,6 +769,7 @@ union Layer {
     PermuteLayer,
     Pooling2dLayer,
     ReshapeLayer,
+    ReduceMaxLayer,
     SoftmaxLayer,
     SpaceToBatchNdLayer,
     DivisionLayer,

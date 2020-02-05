@@ -431,6 +431,12 @@ std::unique_ptr<IWorkload> ClWorkloadFactory::CreateReshape(const ReshapeQueueDe
     return MakeWorkload<ClReshapeWorkload>(descriptor, info);
 }
 
+std::unique_ptr<IWorkload> ClWorkloadFactory::CreateReduceMax(const ReshapeQueueDescriptor& descriptor,
+                                                            const WorkloadInfo& info) const
+{
+    return MakeWorkload<ClReshapeWorkload>(descriptor, info);
+}
+
 std::unique_ptr<IWorkload> ClWorkloadFactory::CreateResize(const ResizeQueueDescriptor& descriptor,
                                                            const WorkloadInfo& info) const
 {

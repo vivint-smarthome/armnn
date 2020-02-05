@@ -775,6 +775,30 @@ bool IWorkloadFactory::IsLayerSupported(const BackendId& backendId,
                                          reason);
             break;
         }
+        case LayerType::ReduceMax:
+        {
+            auto cLayer = boost::polymorphic_downcast<const ReduceMaxLayer*>(&layer);
+            const TensorInfo& output = layer.GetOutputSlot(0).GetTensorInfo();
+            const TensorInfo& input = layer.GetInputSlot(0).GetConnection()->GetTensorInfo();
+
+                result = layerSupportObject->IsReduceMaxSupported(
+                        OverrideDataType(input, dataType),
+                        OverrideDataType(output, dataType),
+                        cLayer->GetParameters(),
+                        reason);
+            /*
+             * TODO: should we pass in axis to see if the op is supported?
+                const TensorInfo& axis = layer.GetInputSlot(1).GetConnection()->GetTensorInfo();
+                result = layerSupportObject->IsReduceMaxSupported(
+                        OverrideDataType(input, dataType),
+                        OverrideDataType(axis, dataType),
+                        OverrideDataType(output, dataType),
+                        cLayer->GetParameters(),
+                        reason);
+            */
+
+            break;
+        }
         case LayerType::Reshape:
         {
             auto cLayer = boost::polymorphic_downcast<const ReshapeLayer*>(&layer);
@@ -1329,6 +1353,12 @@ std::unique_ptr<IWorkload> IWorkloadFactory::CreateQuantize(const QuantizeQueueD
 
 std::unique_ptr<IWorkload> IWorkloadFactory::CreateQuantizedLstm(const QuantizedLstmQueueDescriptor& descriptor,
                                                                  const WorkloadInfo& info) const
+{
+    return std::unique_ptr<IWorkload>();
+}
+
+std::unique_ptr<IWorkload> IWorkloadFactory::CreateReduceMax(const ReduceMaxQueueDescriptor& descriptor,
+                                                           const WorkloadInfo& info) const
 {
     return std::unique_ptr<IWorkload>();
 }

@@ -223,6 +223,7 @@ m_ParserFunctions(Layer_MAX+1, &Deserializer::ParseUnsupportedLayer)
     m_ParserFunctions[Layer_QuantizeLayer]               = &Deserializer::ParseQuantize;
     m_ParserFunctions[Layer_QuantizedLstmLayer]          = &Deserializer::ParseQuantizedLstm;
     m_ParserFunctions[Layer_ReshapeLayer]                = &Deserializer::ParseReshape;
+    m_ParserFunctions[Layer_ReduceMaxLayer]                = &Deserializer::ParseReduceMax;
     m_ParserFunctions[Layer_ResizeBilinearLayer]         = &Deserializer::ParseResizeBilinear;
     m_ParserFunctions[Layer_ResizeLayer]                 = &Deserializer::ParseResize;
     m_ParserFunctions[Layer_RsqrtLayer]                  = &Deserializer::ParseRsqrt;
@@ -323,6 +324,8 @@ Deserializer::LayerBaseRawPtr Deserializer::GetBaseLayer(const GraphPtr& graphPt
             return graphPtr->layers()->Get(layerIndex)->layer_as_QuantizeLayer()->base();
         case Layer::Layer_QuantizedLstmLayer:
             return graphPtr->layers()->Get(layerIndex)->layer_as_QuantizedLstmLayer()->base();
+        case Layer::Layer_ReduceMaxLayer:
+            return graphPtr->layers()->Get(layerIndex)->layer_as_ReduceMaxLayer()->base();
         case Layer::Layer_ReshapeLayer:
             return graphPtr->layers()->Get(layerIndex)->layer_as_ReshapeLayer()->base();
         case Layer::Layer_ResizeBilinearLayer:
@@ -1830,6 +1833,12 @@ armnn::TensorInfo Deserializer::OutputShapeOfReshape(const armnn::TensorInfo& in
     reshapeInfo.SetShape(outputShape);
 
     return reshapeInfo;
+}
+
+void Deserializer::ParseReduceMax(GraphPtr graph, unsigned int layerIndex)
+{
+    // TODO
+    throw ParseException("Deserializer::ParseReduceMax Not Implemented yet");
 }
 
 void Deserializer::ParseReshape(GraphPtr graph, unsigned int layerIndex)

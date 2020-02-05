@@ -172,6 +172,9 @@ public:
     std::unique_ptr<IWorkload> CreateQuantizedLstm(const QuantizedLstmQueueDescriptor& descriptor,
                                                    const WorkloadInfo& info) const override;
 
+    std::unique_ptr<IWorkload> CreateReduceMax(const ReshapeQueueDescriptor& descriptor,
+                                             const WorkloadInfo& info) const override;
+
     std::unique_ptr<IWorkload> CreateReshape(const ReshapeQueueDescriptor& descriptor,
                                              const WorkloadInfo& info) const override;
 

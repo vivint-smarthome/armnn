@@ -58,6 +58,7 @@ enum class LayerType
     Quantize,
     QuantizedLstm,
     Reshape,
+    ReduceMax,
     Resize,
     Rsqrt,
     Slice,

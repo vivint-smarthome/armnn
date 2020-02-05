@@ -42,6 +42,14 @@ StringifyLayerParameters<ReshapeDescriptor>::Serialize(ParameterStringifyFunctio
 }
 
 void
+StringifyLayerParameters<ReduceMaxDescriptor>::Serialize(ParameterStringifyFunction & fn,
+                                                       const ReduceMaxDescriptor & desc)
+{
+    // TODO
+    throw Exception("StringifyLayerParameters<ReduceMaxDescriptor>::Serialize not implemented yet");
+}
+
+void
 StringifyLayerParameters<ActivationDescriptor>::Serialize(ParameterStringifyFunction & fn,
                                                           const ActivationDescriptor & desc)
 {

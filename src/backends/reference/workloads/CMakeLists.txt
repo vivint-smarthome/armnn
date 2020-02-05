@@ -119,6 +119,8 @@ list(APPEND armnnRefBackendWorkloads_sources
     RefPreluWorkload.hpp
     RefQuantizeWorkload.cpp
     RefQuantizeWorkload.hpp
+    RefReduceMaxWorkload.cpp
+    RefReduceMaxWorkload.hpp
     RefReshapeWorkload.cpp
     RefReshapeWorkload.hpp
     RefResizeBilinearWorkload.cpp

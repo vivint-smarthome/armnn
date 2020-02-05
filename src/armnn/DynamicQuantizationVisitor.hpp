@@ -79,6 +79,11 @@ public:
                             const ConstTensor& input,
                             const char* name = nullptr) override;
 
+    void VisitReduceMaxLayer(const IConnectableLayer* layer,
+                           const ReduceMaxDescriptor& reduceMaxDescriptor,
+                           const armnn::Optional<armnn::ConstTensor>& axis,
+                           const char* name = nullptr) override;
+
     void VisitReshapeLayer(const IConnectableLayer* layer,
                            const ReshapeDescriptor& reshapeDescriptor,
                            const char* name = nullptr) override;

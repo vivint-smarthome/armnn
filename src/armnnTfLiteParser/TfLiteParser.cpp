@@ -465,6 +465,7 @@ TfLiteParser::TfLiteParser(const Optional<ITfLiteParser::TfLiteParserOptions>& o
     m_ParserFunctions[tflite::BuiltinOperator_TRANSPOSE]         = &TfLiteParser::ParseTranspose;
     m_ParserFunctions[tflite::BuiltinOperator_TRANSPOSE_CONV]    = &TfLiteParser::ParseTransposeConv;
     m_ParserFunctions[tflite::BuiltinOperator_UNPACK]            = &TfLiteParser::ParseUnpack;
+    m_ParserFunctions[tflite::BuiltinOperator_REDUCE_MAX]            = &TfLiteParser::ParseReduceMax;
 
     // register supported custom operators
     m_CustomParserFunctions["TFLite_Detection_PostProcess"]      = &TfLiteParser::ParseDetectionPostProcess;
@@ -1675,6 +1676,78 @@ void TfLiteParser::ParseMean(size_t subgraphIndex, size_t operatorIndex)
     RegisterOutputSlots(subgraphIndex, operatorIndex, layer, {outputTensorIndexes[0]});
 }
 
+void TfLiteParser::ParseReduceMax(size_t subgraphIndex, size_t operatorIndex) 
+{
+    // TODO
+
+    CHECK_MODEL(m_Model, subgraphIndex, operatorIndex);
+
+    auto inputs = GetInputs(m_Model, subgraphIndex, operatorIndex);
+    auto outputs = GetOutputs(m_Model, subgraphIndex, operatorIndex);
+
+    const auto &operatorPtr = m_Model->subgraphs[subgraphIndex]->operators[operatorIndex];
+    const auto *options = operatorPtr->builtin_options.AsReducerOptions();
+
+    if (options->keep_dims) {
+        printf("Keep dims\n");
+    }
+
+    // Get Tensor info for inputs and outputs
+    // armnn::TensorInfo inputTensorInfo = ToTensorInfo(inputs[n]);
+    // armnn::TensorInfo outputTensorInfo = ToTensorInfo(outputs[n]);
+
+    // Check args
+    
+    // generate args
+    armnn::TensorInfo inputTensorInfo = ToTensorInfo(inputs[0]);
+    armnn::TensorInfo outputTensorInfo = ToTensorInfo(outputs[0]);
+
+    // Create descriptor
+    ReduceMaxDescriptor reduceMaxDescriptor;
+    reduceMaxDescriptor.m_KeepDims = options->keep_dims;
+
+    // Create the layer
+    auto layerName = boost::str(boost::format("ReduceMax:%1%:%2%") % subgraphIndex % operatorIndex);
+    IConnectableLayer *layer;
+   
+    // Optional axis parameter
+    if (inputs.size() == 2) {
+        armnn::TensorInfo axisTensorInfo = ToTensorInfo(inputs[1]);
+        reduceMaxDescriptor.m_HasAxis = true;
+        auto axisTensorAndData = CreateConstTensor(inputs[1],
+                axisTensorInfo,
+                armnn::Optional<armnn::PermutationVector&>()
+        );
+
+        layer = m_Network->AddReduceMaxLayer(reduceMaxDescriptor, Optional<ConstTensor>(axisTensorAndData.first), layerName.c_str());
+    }
+    else {
+        reduceMaxDescriptor.m_HasAxis = false;
+        layer = m_Network->AddReduceMaxLayer(reduceMaxDescriptor, EmptyOptional(), layerName.c_str());
+    }
+
+    BOOST_ASSERT(layer != nullptr);
+
+
+    // setup the inputs/outputs to the layer
+    // AsUnsignedVector(GetInputTensorIds(m_Model, subgraphIndex, operatorIndex));
+    // RegisterInputSlots(subgraphIndex, operatorIndex, layer, );
+    // RegisterOutputSlots(subgraphIndex, operatorIndex, layer, );
+
+    layer->GetOutputSlot(0).SetTensorInfo(outputTensorInfo);
+
+    auto inputTensorIndexes = AsUnsignedVector(GetInputTensorIds(m_Model, subgraphIndex, operatorIndex));
+    auto outputTensorIndexes = AsUnsignedVector(GetOutputTensorIds(m_Model, subgraphIndex, operatorIndex));
+
+    RegisterInputSlots(subgraphIndex, operatorIndex, layer, {inputTensorIndexes[0]});
+    RegisterOutputSlots(subgraphIndex, operatorIndex, layer, {outputTensorIndexes[0]});
+
+    // TODO: do we need a Fused activation layer?
+    // layer = AddFusedActivationLayer(layer, 0, options->fused_activation_function);
+
+    // throw ParseException("TfLiteParser::ParseReduceMax not implemented yet");
+}
+
 void TfLiteParser::ParsePad(size_t subgraphIndex, size_t operatorIndex)
 {
     CHECK_MODEL(m_Model, subgraphIndex, operatorIndex);
@@ -1730,6 +1803,7 @@ void TfLiteParser::ParseTanH(size_t subgraphIndex, size_t operatorIndex)
 {
     ParseActivation(subgraphIndex,operatorIndex,ActivationFunction::TanH);
 }
+
 
 
 void TfLiteParser::ParseActivation(size_t subgraphIndex, size_t operatorIndex, ActivationFunction activationType)

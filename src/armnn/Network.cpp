@@ -1279,6 +1279,15 @@ IConnectableLayer* Network::AddConstantLayer(const ConstTensor& input, const cha
     return layer;
 }
 
+IConnectableLayer* Network::AddReduceMaxLayer(const ReduceMaxDescriptor& reduceMaxDescriptor, const Optional<ConstTensor>& axis, const char *name)
+{
+    const auto layer = m_Graph->AddLayer<ReduceMaxLayer>(reduceMaxDescriptor, name);
+    if (axis.has_value()) {
+        layer->m_Axis = std::make_unique<ScopedCpuTensorHandle>(axis.value());
+    }
+    return layer;
+}
+
 IConnectableLayer* Network::AddReshapeLayer(const ReshapeDescriptor& reshapeDescriptor,
                                             const char* name)
 {

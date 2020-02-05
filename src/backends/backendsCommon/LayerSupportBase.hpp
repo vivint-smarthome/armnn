@@ -259,6 +259,11 @@ public:
                                   const QuantizedLstmInputParamsInfo& paramsInfo,
                                   Optional<std::string&> reasonIfUnsupported = EmptyOptional()) const override;
 
+    bool IsReduceMaxSupported(const TensorInfo& input,
+                            const TensorInfo& output,
+                            const ReduceMaxDescriptor& descriptor,
+                            Optional<std::string&> reasonIfUnsupported = EmptyOptional()) const override;
+
     bool IsReshapeSupported(const TensorInfo& input,
                             const ReshapeDescriptor& descriptor,
                             Optional<std::string&> reasonIfUnsupported = EmptyOptional()) const override;

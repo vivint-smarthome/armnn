@@ -29,6 +29,7 @@ struct PermuteDescriptor;
 struct Pooling2dDescriptor;
 struct PreCompiledDescriptor;
 struct ReshapeDescriptor;
+struct ReduceMaxDescriptor;
 struct ResizeBilinearDescriptor;
 struct ResizeDescriptor;
 struct SoftmaxDescriptor;

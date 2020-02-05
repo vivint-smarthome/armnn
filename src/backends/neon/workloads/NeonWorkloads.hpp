@@ -34,6 +34,7 @@
 #include "NeonPooling2dWorkload.hpp"
 #include "NeonPreluWorkload.hpp"
 #include "NeonQuantizeWorkload.hpp"
+#include "NeonReduceMaxWorkload.hpp"
 #include "NeonReshapeWorkload.hpp"
 #include "NeonResizeWorkload.hpp"
 #include "NeonRsqrtWorkload.hpp"

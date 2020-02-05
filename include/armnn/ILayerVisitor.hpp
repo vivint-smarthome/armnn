@@ -367,6 +367,15 @@ public:
                                    const ReshapeDescriptor& reshapeDescriptor,
                                    const char* name = nullptr) = 0;
 
+    /// Function a reduce max layer should call back to when its Accept(ILayerVisitor&) function is invoked.
+    /// @param layer - pointer to the layer which is calling back to this visit function.
+    /// @param reshapeDescriptor - Parameters for the reshape operation.
+    /// @param name - Optional name for the layer.
+    virtual void VisitReduceMaxLayer(const IConnectableLayer* layer,
+                                    const ReduceMaxDescriptor& reduceMaxDescriptor,
+                                    const armnn::Optional<armnn::ConstTensor>& axis,
+                                   const char* name = nullptr) = 0;
+
     /// Function that a resize bilinear layer should call back to when its Accept(ILayerVisitor&) function is invoked.
     /// @param layer - pointer to the layer which is calling back to this visit function.
     /// @param resizeDesc - Parameters for the resize operation.

@@ -334,6 +334,13 @@ struct ConstantQueueDescriptor : QueueDescriptor
     void Validate(const WorkloadInfo& workloadInfo) const;
 };
 
+struct ReduceMaxQueueDescriptor : QueueDescriptorWithParameters<ReduceMaxDescriptor>
+{
+    const ConstCpuTensorHandle *m_Axis;
+    bool m_KeepDims;
+    void Validate(const WorkloadInfo& workloadInfo) const;
+};
+
 struct ReshapeQueueDescriptor : QueueDescriptorWithParameters<ReshapeDescriptor>
 {
     void Validate(const WorkloadInfo& workloadInfo) const;

@@ -51,6 +51,7 @@ BACKEND_SOURCES := \
         workloads/NeonPreluWorkload.cpp \
         workloads/NeonQuantizedLstmWorkload.cpp \
         workloads/NeonQuantizeWorkload.cpp \
+        workloads/NeonReduceMaxWorkload.cpp \
         workloads/NeonReshapeWorkload.cpp \
         workloads/NeonResizeWorkload.cpp \
         workloads/NeonRsqrtWorkload.cpp \

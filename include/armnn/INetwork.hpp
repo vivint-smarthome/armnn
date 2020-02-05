@@ -370,6 +370,12 @@ public:
     virtual IConnectableLayer* AddConstantLayer(const ConstTensor& input,
                                                 const char* name = nullptr) = 0;
 
+    /// Adds a reduce max layer to the network.
+    /// @param reduceMaxDescriptor - Parameters for the reduce max operation.
+    /// @param name - Optional name for the layer.
+    /// @return - Interface for configuring the layer.
+    virtual IConnectableLayer* AddReduceMaxLayer(const ReduceMaxDescriptor& reduceMaxDescriptor, const Optional<ConstTensor>& axis,
+                                               const char* name = nullptr) = 0;
     /// Adds a reshape layer to the network.
     /// @param reshapeDescriptor - Parameters for the reshape operation.
     /// @param name - Optional name for the layer.

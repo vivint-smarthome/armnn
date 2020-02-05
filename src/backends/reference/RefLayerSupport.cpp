@@ -1414,6 +1414,27 @@ bool RefLayerSupport::IsQuantizeSupported(const TensorInfo& input,
     return supported;
 }
 
+bool RefLayerSupport::IsReduceMaxSupported(const TensorInfo& input,
+                                         const TensorInfo& output,
+                                         const ReduceMaxDescriptor& descriptor,
+                                         Optional<std::string&> reasonIfUnsupported) const
+{
+    throw Exception("RefLayerSupport::IsReduceMaxSupported not implemented");
+    // TODO
+    ignore_unused(descriptor);
+    // Define supported output types.
+    std::array<DataType,5> supportedOutputTypes =
+    {
+        DataType::Float32,
+        DataType::Float16,
+        DataType::Signed32,
+        DataType::QuantisedAsymm8,
+        DataType::QuantisedSymm16
+    };
+    return CheckSupportRule(TypeAnyOf(input, supportedOutputTypes), reasonIfUnsupported,
+        "Reference reshape: input type not supported.");
+}
+
 bool RefLayerSupport::IsReshapeSupported(const TensorInfo& input,
                                          const ReshapeDescriptor& descriptor,
                                          Optional<std::string&> reasonIfUnsupported) const

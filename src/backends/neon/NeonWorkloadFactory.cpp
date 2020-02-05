@@ -401,6 +401,12 @@ std::unique_ptr<IWorkload> NeonWorkloadFactory::CreateReshape(const ReshapeQueue
     return std::make_unique<NeonReshapeWorkload>(descriptor, info);
 }
 
+std::unique_ptr<IWorkload> NeonWorkloadFactory::CreateReduceMax(const ReduceMaxQueueDescriptor& descriptor,
+                                                              const WorkloadInfo& info) const
+{
+    return std::make_unique<NeonReduceMaxWorkload>(descriptor, info);
+}
+
 std::unique_ptr<IWorkload> NeonWorkloadFactory::CreateResize(const ResizeQueueDescriptor& descriptor,
                                                              const WorkloadInfo& info) const
 {

@@ -49,6 +49,7 @@
 #include "layers/PreluLayer.hpp"
 #include "layers/QuantizeLayer.hpp"
 #include "layers/QuantizedLstmLayer.hpp"
+#include "layers/ReduceMaxLayer.hpp"
 #include "layers/ReshapeLayer.hpp"
 #include "layers/ResizeLayer.hpp"
 #include "layers/RsqrtLayer.hpp"
@@ -135,6 +136,7 @@ DECLARE_LAYER(Prelu)
 DECLARE_LAYER(Quantize)
 DECLARE_LAYER(QuantizedLstm)
 DECLARE_LAYER(Reshape)
+DECLARE_LAYER(ReduceMax)
 DECLARE_LAYER(Resize)
 DECLARE_LAYER(Rsqrt)
 DECLARE_LAYER(Slice)

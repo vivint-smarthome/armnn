@@ -270,6 +270,14 @@ void DynamicQuantizationVisitor::VisitReshapeLayer(const IConnectableLayer* laye
     AddToNonCalibratedLayers(layer);
 }
 
+void DynamicQuantizationVisitor::VisitReduceMaxLayer(const IConnectableLayer* layer,
+                                                   const ReduceMaxDescriptor& reduceMaxDescriptor,
+                           const armnn::Optional<armnn::ConstTensor>& axis,
+                                                   const char* name)
+{
+    throw Exception("DynamicQuantizationVisitor::VisitReduceMaxLayer not implemented yet");
+}
+
 void DynamicQuantizationVisitor::VisitSplitterLayer(const IConnectableLayer* layer,
                                                     const SplitterDescriptor& splitterDescriptor,
                                                     const char* name)

@@ -193,6 +193,9 @@ public:
     virtual std::unique_ptr<IWorkload> CreateReshape(const ReshapeQueueDescriptor& descriptor,
                                                      const WorkloadInfo& info) const;
 
+    virtual std::unique_ptr<IWorkload> CreateReduceMax(const ReduceMaxQueueDescriptor& descriptor,
+                                                     const WorkloadInfo& info) const;
+
     virtual std::unique_ptr<IWorkload> CreateResize(const ResizeQueueDescriptor& descriptor,
                                                     const WorkloadInfo& info) const;
 

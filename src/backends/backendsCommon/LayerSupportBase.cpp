@@ -425,6 +425,15 @@ bool LayerSupportBase::IsReshapeSupported(const TensorInfo& input,
     return DefaultLayerSupport(__func__, __FILE__, __LINE__, reasonIfUnsupported);
 }
 
+bool LayerSupportBase::IsReduceMaxSupported(const TensorInfo& input,
+                                          const TensorInfo& output,
+                                          const ReduceMaxDescriptor& descriptor,
+                                          Optional<std::string&> reasonIfUnsupported) const
+{
+    throw Exception("LayerSupportBase::IsReduceMaxSupported not implemented");
+    return DefaultLayerSupport(__func__, __FILE__, __LINE__, reasonIfUnsupported);
+}
+
 bool LayerSupportBase::IsResizeBilinearSupported(const TensorInfo& input,
                                                  const TensorInfo& output,
                                                  Optional<std::string&> reasonIfUnsupported) const

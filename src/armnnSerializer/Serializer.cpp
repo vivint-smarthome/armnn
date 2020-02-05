@@ -741,6 +741,35 @@ void SerializerVisitor::VisitPermuteLayer(const armnn::IConnectableLayer* layer,
     CreateAnyLayer(flatBufferPermuteLayer.o, serializer::Layer::Layer_PermuteLayer);
 }
 
+// Build FlatBuffer for ReduceMax Layer
+void SerializerVisitor::VisitReduceMaxLayer(const armnn::IConnectableLayer *layer,
+        const armnn::ReduceMaxDescriptor &reduceMaxDescriptor,
+        const armnn::Optional<armnn::ConstTensor>& axis,
+        const char *name) {
+    // Create FlatBuffer BaseLayer
+    auto flatBufferReduceMaxBaseLayer = CreateLayerBase(layer, serializer::LayerType::LayerType_ReduceMax);
+
+    auto flatBufferReduceMaxDesc = serializer::CreateReduceMaxDescriptor(m_flatBufferBuilder,
+                                                                     reduceMaxDescriptor.m_KeepDims
+                                                                     );
+
+    flatbuffers::Offset<serializer::ConstTensor> flatBufferAxisConstTensorInfo;
+    if (axis.has_value()) {
+        flatBufferAxisConstTensorInfo = CreateConstTensorInfo(axis.value());
+    }
+
+    // Create the FlatBuffer ReduceMaxLayer
+    auto flatBufferReduceMaxLayer = serializer::CreateReduceMaxLayer(
+            m_flatBufferBuilder,
+            flatBufferReduceMaxBaseLayer,
+            flatBufferReduceMaxDesc,
+            flatBufferAxisConstTensorInfo);
+
+
+    // Add the AnyLayer to the FlatBufferLayers
+    CreateAnyLayer(flatBufferReduceMaxLayer.o, serializer::Layer::Layer_ReduceMaxLayer);
+}
+
 // Build FlatBuffer for Reshape Layer
 void SerializerVisitor::VisitReshapeLayer(const armnn::IConnectableLayer* layer,
                                           const armnn::ReshapeDescriptor& reshapeDescriptor,

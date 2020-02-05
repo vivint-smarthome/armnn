@@ -187,6 +187,11 @@ public:
                            const ReshapeDescriptor&,
                            const char*) override { DefaultPolicy::Apply(__func__); }
 
+    void VisitReduceMaxLayer(const IConnectableLayer*,
+                           const ReduceMaxDescriptor&,
+                           const armnn::Optional<armnn::ConstTensor>& axis,
+                           const char*) override { DefaultPolicy::Apply(__func__); }
+
     void VisitResizeBilinearLayer(const IConnectableLayer*,
                                   const ResizeBilinearDescriptor&,
                                   const char*) override { DefaultPolicy::Apply(__func__); }
