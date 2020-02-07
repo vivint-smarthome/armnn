@@ -860,9 +860,9 @@ void StackQueueDescriptor::Validate(const WorkloadInfo& workloadInfo) const
         }
     }
 
-    if (inputShape.GetNumDimensions() > 4)
+    if (inputShape.GetNumDimensions() > 5)
     {
-        throw InvalidArgumentException(descriptorName + ": Input tensor may have up to 4 dimensions.");
+        throw InvalidArgumentException(descriptorName + ": Input tensor may have up to 5 dimensions.");
     }
 
     // m_Axis is 0-based and may take values from 0 to the number of input dimensions (inclusive),
@@ -899,9 +899,9 @@ void StackQueueDescriptor::Validate(const WorkloadInfo& workloadInfo) const
         }
     }
 
-    if (outputShape.GetNumDimensions() > 5)
+    if (outputShape.GetNumDimensions() > 6)
     {
-        throw InvalidArgumentException(descriptorName + ": Output tensor may have up to 5 dimensions.");
+        throw InvalidArgumentException(descriptorName + ": Output tensor may have up to 6 dimensions.");
     }
 
     // Check the supported data types
