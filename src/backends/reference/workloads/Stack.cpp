@@ -36,26 +36,30 @@ void Stack(const StackQueueDescriptor& data,
     const unsigned int iChannels   = (inputNumDims > 1) ? inputDims[1] : 1;
     const unsigned int iHeight     = (inputNumDims > 2) ? inputDims[2] : 1;
     const unsigned int iWidth      = (inputNumDims > 3) ? inputDims[3] : 1;
+    const unsigned int i4      = (inputNumDims > 4) ? inputDims[4] : 1;
 
     const unsigned int oBatchSize  = outputDims[1];
     const unsigned int oChannels   = (outputNumDims > 2) ? outputDims[2] : 1;
     const unsigned int oHeight     = (outputNumDims > 3) ? outputDims[3] : 1;
     const unsigned int oWidth      = (outputNumDims > 4) ? outputDims[4] : 1;
+    const unsigned int o5      = (outputNumDims > 5) ? outputDims[5] : 1;
 
     // Array to store the input coordinates
     // iCoordinates[0] = i, iCoordinates[1] = bi, iCoordinates[2] = ci
-    // iCoordinates[3] = hi, iCoordinates[4] = wi, iCoordinates[5] = 0
-    // iCoordinates[5] will be always zero and used for not incrementing
+    // iCoordinates[3] = hi, iCoordinates[4] = wi, iCoordinates[5] = i4i,
+    // iCoordinates[6] = 0
+    // iCoordinates[6] will be always zero and used for not incrementing
     // the output when the input has less than 4 dimensions
-    std::array<unsigned int, 6> iCoordinates{ 0 };
+    std::array<unsigned int, 7> iCoordinates{ 0 };
 
     // Array of pointers used to map the output coordinates to the input ones, in accordance with the axis
     // This array is initialized with &iCoordinates[5] since this will be always zero
-    std::array<unsigned int *, 5> oCoordinates = { &iCoordinates[5],
-                                                   &iCoordinates[5],
-                                                   &iCoordinates[5],
-                                                   &iCoordinates[5],
-                                                   &iCoordinates[5] };
+    std::array<unsigned int *, 6> oCoordinates = { &iCoordinates[6],
+                                                   &iCoordinates[6],
+                                                   &iCoordinates[6],
+                                                   &iCoordinates[6],
+                                                   &iCoordinates[6],
+                                                   &iCoordinates[6] };
 
     // Set the axis coordinate
     oCoordinates[axis] = &iCoordinates[0];
@@ -77,6 +81,7 @@ void Stack(const StackQueueDescriptor& data,
     unsigned int &ci = iCoordinates[2];
     unsigned int &hi = iCoordinates[3];
     unsigned int &wi = iCoordinates[4];
+    unsigned int &i4i = iCoordinates[5];
 
     // Alias for the output coordinates
     unsigned int &o  = *(oCoordinates[0]);
@@ -84,6 +89,7 @@ void Stack(const StackQueueDescriptor& data,
     unsigned int &co = *(oCoordinates[2]);
     unsigned int &ho = *(oCoordinates[3]);
     unsigned int &wo = *(oCoordinates[4]);
+    unsigned int &o5o = *(oCoordinates[5]);
 
     // Stack tensors
     for(; i < iNumTensors; ++(i))
@@ -96,15 +102,19 @@ void Stack(const StackQueueDescriptor& data,
                 {
                     for(wi = 0; wi < iWidth; ++(wi))
                     {
-                        output[o  * oWidth * oHeight * oChannels * oBatchSize +
-                               bo * oWidth * oHeight * oChannels +
-                               co * oWidth * oHeight +
-                               ho * oWidth +
-                               wo];
+                        for(i4i = 0; i4i < i4; ++(i4i))
+                        {
+                            output[o  * o5 * oWidth * oHeight * oChannels * oBatchSize +
+                                   bo * o5 * oWidth * oHeight * oChannels +
+                                   co * o5 * oWidth * oHeight +
+                                   ho * o5 * oWidth +
+                                   wo * o5 +
+                                   o5o];
 
-                        output.Set(inputs[i]->Get());
+                            output.Set(inputs[i]->Get());
 
-                        ++(*(inputs[i]));
+                            ++(*(inputs[i]));
+                        }
                     }
                 }
             }
