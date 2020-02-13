@@ -41,6 +41,7 @@ NeonReduceMaxWorkload::NeonReduceMaxWorkload(const ReduceMaxQueueDescriptor& des
         // TODO: make this work for other stride data types.
         // Assuming 1 dimensional axis for now.
         axis.set_num_dimensions(shape[0]);
+
         printf("Axis passed through to NeonReduceMaxWorkload Coordinate: [");
         for (int i = 0; i < shape[0]; i++) {
             axis[i] = *static_cast<const int32_t*>(mem+i*stride[0]);
@@ -58,6 +59,14 @@ void NeonReduceMaxWorkload::Execute() const
 {
     ARMNN_SCOPED_PROFILING_EVENT_NEON("NeonReduceMaxWorkload_Execute");
     m_Layer->run();
+    // print output
+    arm_compute::ITensor& output = boost::polymorphic_downcast<IAclTensorHandle*>(m_Data.m_Outputs[0])->GetTensor();
+
+    /*
+    std::cout << "Output from NeonReduceMaxWorkload" << std::endl;
+    arm_compute::IOFormatInfo iofmt;
+    output.print(std::cout, iofmt);
+    */
 }
 
 } //namespace armnn

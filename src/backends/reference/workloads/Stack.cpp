@@ -112,6 +112,7 @@ void Stack(const StackQueueDescriptor& data,
                                    o5o];
 
                             output.Set(inputs[i]->Get());
+                            //output.Set(0);
 
                             ++(*(inputs[i]));
                         }
@@ -120,6 +121,8 @@ void Stack(const StackQueueDescriptor& data,
             }
         }
     }
+
+    // print output
 }
 
 } // namespace armnn

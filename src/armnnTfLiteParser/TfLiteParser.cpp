@@ -1689,7 +1689,7 @@ void TfLiteParser::ParseReduceMax(size_t subgraphIndex, size_t operatorIndex)
     const auto *options = operatorPtr->builtin_options.AsReducerOptions();
 
     if (options->keep_dims) {
-        printf("Keep dims\n");
+        //printf("Keep dims\n");
     }
 
     // Get Tensor info for inputs and outputs
@@ -1920,8 +1920,8 @@ void TfLiteParser::ParseReshape(size_t subgraphIndex, size_t operatorIndex)
         // TODO: 
         // if new_shape is missing, then generate the shape based on other information
         // about the node.
-        printf("Reshape node is missing new_shape attribute!\n");
-        printf("Matching output shape instead!\n");
+        //printf("Reshape node is missing new_shape attribute!\n");
+        //printf("Matching output shape instead!\n");
 
         reshapeOutputTensorInfo = TfLiteParser::OutputShapeOfReshape(inputTensorInfo, outputs[0]->shape);
     }
@@ -2830,6 +2830,7 @@ TfLiteParser::CreateConstTensor(TensorRawPtr tensorPtr,
 
     // TODO: const_cast is not good, figure out another way
     // Resize buffer if it wouldn't fit
+    /*
     if(tensorInfo.GetNumElements() > bufferPtr->data.size() ||
             tensorInfo.GetNumBytes() > bufferPtr->data.size()) {
         printf("CreateConstTensor: tensorInfo.GetNumElements() > bufferPtr->data.size(), patching\n");
@@ -2838,6 +2839,7 @@ TfLiteParser::CreateConstTensor(TensorRawPtr tensorPtr,
         mod_data.resize(std::max(tensorInfo.GetNumElements(), tensorInfo.GetNumBytes()), 0);
         std::fill(mod_data.begin() + old_size, mod_data.end(), 0);
     }
+    */
 
     CHECK_BUFFER_SIZE(bufferPtr, tensorInfo, tensorPtr->buffer);
 

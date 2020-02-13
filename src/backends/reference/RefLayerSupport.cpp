@@ -1419,8 +1419,8 @@ bool RefLayerSupport::IsReduceMaxSupported(const TensorInfo& input,
                                          const ReduceMaxDescriptor& descriptor,
                                          Optional<std::string&> reasonIfUnsupported) const
 {
-    throw Exception("RefLayerSupport::IsReduceMaxSupported not implemented");
-    // TODO
+    // throw Exception("RefLayerSupport::IsReduceMaxSupported not implemented");
+    // TODO: What should be done here?
     ignore_unused(descriptor);
     // Define supported output types.
     std::array<DataType,5> supportedOutputTypes =
