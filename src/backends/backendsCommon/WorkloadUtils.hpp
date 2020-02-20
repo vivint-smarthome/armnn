@@ -206,7 +206,7 @@ static size_t dim_index(std::vector<size_t> const &pos, TensorShape const &dimen
 // CopyFunc:
 // copy(dst, src, bytes)
 template <typename CopyFunc>
-void CopyTensorContentsGeneric(const ITensorHandle* srcTensor, ITensorHandle* dstTensor, CopyFunc copy)
+void XCopyTensorContentsGeneric(const ITensorHandle* srcTensor, ITensorHandle* dstTensor, CopyFunc copy)
 {
     //std::cout << "me CopyTensorContentsGeneric Function: is not complete" << std::endl;
 
@@ -278,6 +278,161 @@ void CopyTensorContentsGeneric(const ITensorHandle* srcTensor, ITensorHandle* ds
         done = increment_pos(pos, iter_dim, srcShape, dstShape);
     }
     // std::cout << "Executed " << copy_calls << " Copy Calls" << std::endl;
+
+    srcTensor->Unmap();
+    dstTensor->Unmap();
+}
+
+template <typename CopyFunc>
+void CopyTensorContentsGeneric(const ITensorHandle* srcTensor, ITensorHandle* dstTensor, CopyFunc copy)
+{
+    // For ease of understanding, names are assigned to the dimensions
+    // of the tensor as if NHWC, however this routine works with any 6D tensor
+    static_assert(MaxNumOfTensorDimensions == 6, "Please update CopyTensorContents");
+
+    TensorShape srcStrides      = srcTensor->GetStrides();
+    const TensorShape& srcShape = srcTensor->GetShape();
+    TensorShape dstStrides      = dstTensor->GetStrides();
+    const TensorShape& dstShape = dstTensor->GetShape();
+
+    size_t srcI0 = 1;
+    size_t srcDepth    = 1;
+    size_t srcBatches  = 1;
+    size_t srcHeight   = 1;
+    size_t srcWidth    = 1;
+    size_t srcChannels = 1;
+
+    AssignValues(srcShape.GetNumDimensions(),
+                 0,
+                 srcShape,
+                 srcChannels,
+                 srcWidth,
+                 srcHeight,
+                 srcBatches,
+                 srcDepth,
+                 srcI0
+                 );
+
+    size_t srcI0Stride = 0;
+    size_t srcDepthStride   = 0;
+    size_t srcBatchStride   = 0;
+    size_t srcHeightStride  = 0;
+    size_t srcWidthStride   = 0;
+    size_t srcChannelStride = 0;
+    AssignValues(srcStrides.GetNumDimensions(),
+                 0,
+                 srcStrides,
+                 srcChannelStride,
+                 srcWidthStride,
+                 srcHeightStride,
+                 srcBatchStride,
+                 srcDepthStride,
+                 srcI0Stride
+                 );
+
+    size_t dstI0 = 1;
+    size_t dstDepth    = 1;
+    size_t dstBatches  = 1;
+    size_t dstHeight   = 1;
+    size_t dstWidth    = 1;
+    size_t dstChannels = 1;
+    AssignValues(dstShape.GetNumDimensions(),
+                 0,
+                 dstShape,
+                 dstChannels,
+                 dstWidth,
+                 dstHeight,
+                 dstBatches,
+                 dstDepth,
+                 dstI0
+                 );
+
+    size_t dstI0Stride = 0;
+    size_t dstDepthStride   = 0;
+    size_t dstBatchStride   = 0;
+    size_t dstHeightStride  = 0;
+    size_t dstWidthStride   = 0;
+    size_t dstChannelStride = 0;
+    AssignValues(dstStrides.GetNumDimensions(),
+                 0,
+                 dstStrides,
+                 dstChannelStride,
+                 dstWidthStride,
+                 dstHeightStride,
+                 dstBatchStride,
+                 dstDepthStride,
+                 dstI0Stride);
+
+    const unsigned char* srcData;
+    unsigned char* dstData;
+    {
+        ARMNN_SCOPED_PROFILING_EVENT(Compute::Undefined, "Synchronize buffers");
+        srcData = static_cast<const uint8_t*>(srcTensor->Map());
+        dstData = static_cast<uint8_t*>(dstTensor->Map());
+    }
+
+    size_t copyLength  = std::min(srcChannels*srcChannelStride, dstChannels*dstChannelStride);
+    size_t copyWidth   = std::min(srcWidth, dstWidth);
+    size_t copyHeight  = std::min(srcHeight, dstHeight);
+    size_t copyBatches = std::min(srcBatches, dstBatches);
+    size_t copyDepth   = std::min(srcDepth, dstDepth);
+    size_t copyI0 = std::min(srcI0, dstI0);
+
+    // Coalesce inner dimensions where possible
+    // to reduce overheard calling copy() and to
+    // allow for memory bandwidth optimisations
+    if (copyLength == srcWidthStride &&
+        copyLength == dstWidthStride)
+    {
+        // There is no special padding between rows,
+        // and sizes are compatible, so copy whole rows
+        copyLength *= copyWidth;
+        copyWidth = 1;
+
+        if (copyLength == srcHeightStride &&
+            copyLength == dstHeightStride)
+        {
+            // There is no special padding between batches
+            // and sizes are compatible so copy whole batches
+            copyLength *= copyHeight;
+            copyHeight = 1;
+        }
+    }
+
+    for (unsigned int i0 = 0; i0 < copyI0; ++i0) 
+    {
+        auto srcPtrI0 = srcData;
+        auto dstPtrI0 = dstData;
+        for (unsigned int d = 0; d < copyDepth; ++d)
+        {
+            auto srcPtrDepth = srcData;
+            auto dstPtrDepth = dstData;
+            for (unsigned int b = 0; b < copyBatches; ++b)
+            {
+                auto srcPtrBatch = srcData;
+                auto dstPtrBatch = dstData;
+                for (unsigned int h = 0; h < copyHeight; ++h)
+                {
+                    auto srcPtrChannel = srcData;
+                    auto dstPtrChannel = dstData;
+                    for (unsigned int w = 0; w < copyWidth; ++w)
+                    {
+                        copy(dstData, srcData, copyLength);
+                        dstData += dstWidthStride;
+                        srcData += srcWidthStride;
+                    }
+                    dstData += (static_cast<long>(dstHeightStride) - (dstData - dstPtrChannel));
+                    srcData += (static_cast<long>(srcHeightStride) - (srcData - srcPtrChannel));
+                }
+                dstData += (static_cast<long>(dstBatchStride) - (dstData - dstPtrBatch));
+                srcData += (static_cast<long>(srcBatchStride) - (srcData - srcPtrBatch));
+            }
+            dstData += (static_cast<long>(dstDepthStride) - (dstData - dstPtrDepth));
+            srcData += (static_cast<long>(srcDepthStride) - (srcData - srcPtrDepth));
+        }
+        dstData += (static_cast<long>(dstI0Stride) - (dstData - dstPtrI0));
+        srcData += (static_cast<long>(srcI0Stride) - (srcData - srcPtrI0));
+    }
 
     srcTensor->Unmap();
     dstTensor->Unmap();

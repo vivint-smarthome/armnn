@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <arm_compute/runtime/Scheduler.h>
 
 /// A simple example of using the ArmNN SDK API. In this sample, the users single input number is multiplied by 1.0f
 /// using a fully connected layer with a single neuron to produce an output number that is the same as the input.
@@ -21,6 +22,7 @@ int main(int argc, char **argv)
 {
     using namespace armnn;
     using namespace armnnTfLiteParser;
+    arm_compute::Scheduler::get().set_num_threads(1);
 
     if (argc != 3) {
         std::cout << "Usage: CompSample model.tflite image.rgb" << std::endl;

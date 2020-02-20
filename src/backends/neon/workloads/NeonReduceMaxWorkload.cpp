@@ -42,12 +42,12 @@ NeonReduceMaxWorkload::NeonReduceMaxWorkload(const ReduceMaxQueueDescriptor& des
         // Assuming 1 dimensional axis for now.
         axis.set_num_dimensions(shape[0]);
 
-        printf("Axis passed through to NeonReduceMaxWorkload Coordinate: [");
+        //printf("Axis passed through to NeonReduceMaxWorkload Coordinate: [");
         for (int i = 0; i < shape[0]; i++) {
             axis[i] = *static_cast<const int32_t*>(mem+i*stride[0]);
-            printf(" %d", axis[i]);
+            //printf(" %d", axis[i]);
         }
-        printf(" ]\n");
+        //printf(" ]\n");
         descriptor.m_Axis->Unmap();
     }
 

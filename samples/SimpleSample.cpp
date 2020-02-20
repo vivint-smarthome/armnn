@@ -18,7 +18,7 @@ int main()
     using namespace armnn;
     using namespace armnnTfLiteParser;
 
-    //arm_compute::Scheduler::get().set_num_threads(6);
+    arm_compute::Scheduler::get().set_num_threads(1);
 
     std::cout << arm_compute::Scheduler::get().num_threads() << " threads" << std::endl;
 

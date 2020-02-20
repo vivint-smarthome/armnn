@@ -14,7 +14,7 @@
 namespace armnn
 {
 
-constexpr unsigned int MaxNumOfTensorDimensions = 16U;
+constexpr unsigned int MaxNumOfTensorDimensions = 6U;
 
 // The lowest performance data capture interval we support is 10 miliseconds.
 constexpr unsigned int LOWEST_CAPTURE_PERIOD = 10000u;

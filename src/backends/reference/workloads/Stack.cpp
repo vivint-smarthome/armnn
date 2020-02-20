@@ -113,7 +113,6 @@ void Stack(const StackQueueDescriptor& data,
 
                             output.Set(inputs[i]->Get());
                             //output.Set(0);
-
                             ++(*(inputs[i]));
                         }
                     }
